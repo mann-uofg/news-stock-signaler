@@ -22,7 +22,7 @@ services:
 
   # ---------- Database ----------
   timescaledb:
-    image: timescale/timescaledb-postgis:latest-pg14
+    image: timescale/timescaledb:latest-pg14
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -44,7 +44,7 @@ services:
     ports: [ "9090:9090" ]
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana-oss:10.4.1
     depends_on: [ prometheus ]
     ports: [ "3000:3000" ]
     volumes:
