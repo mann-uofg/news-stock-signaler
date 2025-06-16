@@ -30,6 +30,7 @@ services:
     ports: [ "5432:5432" ]
     volumes:
       - timescale-data:/var/lib/postgresql/data
+      - ./sql/init_raw_news.sql:/docker-entrypoint-initdb.d/init_raw_news.sql
 
   # ---------- Cache ----------
   redis:
@@ -49,6 +50,17 @@ services:
     ports: [ "3000:3000" ]
     volumes:
       - grafana-data:/var/lib/grafana
+
+  # ---------- Scraping ----------
+  scraper:
+    build: ../scraper
+    env_file:
+      - ../scraper/.env
+    depends_on:
+      - timescaledb
+    ports:
+      - "8001:8001"
+      
 
 volumes:
   timescale-data:
