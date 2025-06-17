@@ -61,7 +61,15 @@ services:
     ports:
       - "8001:8001"
       
-
+  # ---------- Mapper ----------
+  mapper:
+    build: ../scraper
+    command: ["python", "mapper.py"]
+    env_file:
+      - ../scraper/.env
+    depends_on:
+      - timescaledb
+    
 volumes:
   timescale-data:
   grafana-data:

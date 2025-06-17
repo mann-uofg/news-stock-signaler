@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+from typing import List
 
 load_dotenv()                       # read .env file
 DATABASE_URL = os.getenv(
@@ -22,6 +23,11 @@ app = FastAPI(title="News Scraper")
 
 class ScrapeRequest(BaseModel):
     feed_url: HttpUrl
+
+class NewsOut(BaseModel):
+    ticker: str | None
+    headline: str
+    timestamp: datetime
 
 @app.post("/scrape")
 async def scrape(req: ScrapeRequest):
@@ -45,3 +51,18 @@ async def scrape(req: ScrapeRequest):
             res = await sess.execute(stmt, {"headline": entry.title, "url": entry.link, "ts": ts})
             inserted += res.rowcount
     return {"inserted": inserted, "total": len(feed.entries)}
+
+@app.get("/latest/{symbol}", response_model=List[NewsOut])
+async def latest(symbol: str, limit: int = 20):
+    q = text("""
+        SELECT ticker, headline, timestamp
+        FROM raw_news
+        WHERE ticker = :sym
+        ORDER BY timestamp DESC
+        LIMIT :lim
+    """)
+    async with SessionLocal() as sess:
+        result = await sess.execute(q, {"sym": symbol.upper(), "lim": limit})
+        rows = result.mappings().all()        # <= this gives you dict-like rows
+    return rows                              # FastAPI/pydantic will handle validation
+
