@@ -13,3 +13,6 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 AutoTokenizer.from_pretrained("ProsusAI/finbert")
 PY
+# expose metrics on :8010
+EXPOSE 8010
+CMD ["python", "price_worker.py"]

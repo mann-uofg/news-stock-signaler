@@ -78,6 +78,32 @@ services:
       - ../scraper/.env
     depends_on:
       - timescaledb
+  
+  price_worker:
+    build:
+      context: ../scraper
+      dockerfile: price_worker.Dockerfile
+    container_name: price_worker
+    depends_on:
+      - timescaledb
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@timescaledb:5432/newsdb
+      - PRICE_SYMBOLS=AAPL,MSFT,GOOGL,AMZN,TSLA
+    command: ["python", "-u", "price_worker.py"]
+    ports:
+      - "8010:8010"        # Prometheus metrics
+
+  analytics:
+    build:
+      context: ../analytics
+    container_name: analytics
+    depends_on:
+      - timescaledb
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@timescaledb:5432/newsdb
+    ports:
+      - "8020:8020"
+
 
     
 volumes:
