@@ -29,6 +29,13 @@ class NewsOut(BaseModel):
     headline: str
     timestamp: datetime
 
+class EnrichedOut(BaseModel):
+    ticker: str|None
+    headline: str
+    timestamp: datetime
+    sent_score: float
+    event_lbl: str
+
 @app.post("/scrape")
 async def scrape(req: ScrapeRequest):
     feed = feedparser.parse(str(req.feed_url))
@@ -66,3 +73,16 @@ async def latest(symbol: str, limit: int = 20):
         rows = result.mappings().all()        # <= this gives you dict-like rows
     return rows                              # FastAPI/pydantic will handle validation
 
+@app.get("/sentiment/{symbol}", response_model=List[EnrichedOut])
+async def latest_sent(symbol: str, limit:int=20):
+    q = text("""
+      SELECT ticker, headline, timestamp, sent_score, event_lbl
+      FROM enriched_news
+      WHERE ticker = :sym
+      ORDER BY timestamp DESC
+      LIMIT :lim
+    """)
+    async with SessionLocal() as sess:
+        rows = (await sess.execute(q, {"sym":symbol.upper(),"lim":limit})
+               ).mappings().all()
+    return rows

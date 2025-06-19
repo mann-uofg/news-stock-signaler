@@ -56,3 +56,5 @@ webencodings==0.5.1
 websockets==15.0.1
 yarl==1.20.1
 yfinance==0.2.63
+transformers>=4.0.0
+torch>=1.13.0

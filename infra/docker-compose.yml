@@ -69,6 +69,16 @@ services:
       - ../scraper/.env
     depends_on:
       - timescaledb
+  
+  nlp_worker:
+    build:
+      context: ../scraper        # same image as scraper/mapper
+    command: ["python", "nlp_worker.py"]
+    env_file:
+      - ../scraper/.env
+    depends_on:
+      - timescaledb
+
     
 volumes:
   timescale-data:
