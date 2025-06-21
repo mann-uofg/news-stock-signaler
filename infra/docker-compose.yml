@@ -49,13 +49,18 @@ services:
     depends_on: [ prometheus ]
     ports: [ "3000:3000" ]
     volumes:
-      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
 
   # ---------- Scraping ----------
   scraper:
     build: ../scraper
     env_file:
       - ../scraper/.env
+    command: uvicorn main:app --host 0.0.0.0 --port 8001
     depends_on:
       - timescaledb
     ports:

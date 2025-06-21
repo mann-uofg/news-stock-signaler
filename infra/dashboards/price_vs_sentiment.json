@@ -1,0 +1,34 @@
+{
+  "uid": "price-vs-sentiment",
+  "title": "Price vs Sentiment",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-2d", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Price (USD)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 9 },
+      "targets": [
+        {
+          "expr": "price_close{symbol=\"TSLA\"}",
+          "legendFormat": "TSLA",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg Sentiment (1 h)",
+      "gridPos": { "x": 0, "y": 9, "w": 12, "h": 9 },
+      "targets": [
+        {
+          "expr": "avg_over_time(sentiment_score{symbol=\"TSLA\"}[1h])",
+          "legendFormat": "TSLA",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
