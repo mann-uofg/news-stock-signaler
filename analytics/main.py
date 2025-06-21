@@ -5,6 +5,7 @@ import os, pandas as pd
 from sqlalchemy.ext.asyncio import create_async_engine
 from prometheus_client import Counter, generate_latest
 from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, HTTPException
 
 DB = os.getenv("DATABASE_URL",
     "postgresql+asyncpg://postgres:postgres@timescaledb:5432/newsdb")
@@ -62,3 +63,20 @@ async def trend(symbol: str, days: int = 30):
         sent = pd.read_sql(sql2, conn)
     return {"price": price.to_dict(orient="records"),
             "sentiment": sent.to_dict(orient="records")}
+
+@app.get("/signals/{symbol}")
+async def latest_signal(symbol: str):
+    async with Session() as s:
+        res = await s.execute(
+            text("""
+                  SELECT direction, ts
+                  FROM trade_signals
+                  WHERE symbol = :sym
+                  ORDER BY ts DESC
+                  LIMIT 1"""),
+            {"sym": symbol.upper()}
+        )
+        row = res.first()
+        if not row:
+            raise HTTPException(status_code=404, detail="no signal yet")
+        return dict(direction=row.direction, ts=row.ts)

@@ -104,6 +104,17 @@ services:
     ports:
       - "8020:8020"
 
+  signal_worker:
+    build:
+      context: ..
+      dockerfile: signal_worker.Dockerfile
+    depends_on:
+      - timescaledb
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@timescaledb:5432/newsdb
+      - PRICE_SYMBOLS=${PRICE_SYMBOLS:-AAPL,MSFT,GOOGL,AMZN,TSLA}
+    restart: unless-stopped
+
 
     
 volumes:
